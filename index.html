@@ -754,7 +754,7 @@ h3{font-size:14px;font-weight:700}
         return '<button class="pack'+(k.best?' best':'')+'" data-pack="'+i+'"><span><span class="amt">'+k.a+' ⚡</span><br><span class="hint">'+(k.h||"&nbsp;")+'</span></span><span class="price">'+k.p+' ⭐</span></button>';
       }).join("") +
       '<button class="pack best" data-pro="1"><span><span class="amt">PRO на месяц</span><br><span class="hint">400 ⚡ сразу и −20% на все стили</span></span><span class="price">299 ⭐</span></button>'+
-      '<p class="note">Оплата через Telegram Stars. В демо-режиме деньги не списываются.</p>';
+      '<p class="note">Оплата через Telegram Stars в чате с ботом. После оплаты — команда /balance.</p>';
     } else if(kind === "history"){
       title = "История ⚡";
       body = '<ul class="list">' + state.history.map(function(h){
@@ -782,8 +782,16 @@ h3{font-size:14px;font-weight:700}
   $("#scrim").addEventListener("click", closeSheet);
   document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeSheet(); });
 
+  var BOT_USERNAME = "avalabgen_bot";
   $("#sheetBody").addEventListener("click", function(e){
     var b = e.target.closest(".pack"); if(!b) return;
+    // Inside Telegram: open real Stars payment in the bot chat
+    if(tg && tg.initData){
+      var key = b.dataset.pro ? "pro" : ["p50","p150","p500"][+b.dataset.pack];
+      closeSheet();
+      tg.openTelegramLink("https://t.me/" + BOT_USERNAME + "?start=buy_" + key);
+      return;
+    }
     if(b.dataset.pro){
       state.pro = Date.now() + 30*864e5; state.balance += 400;
       state.history.unshift({t:Date.now(), d:"PRO на месяц", v:400});
